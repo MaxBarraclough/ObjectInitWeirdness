@@ -1,4 +1,4 @@
-/*
+/**
  * Exploring C++'s weird and wonderful object-initialisation rules,
  * as explained in http://stackoverflow.com/a/2418195 by StackOverflow user 'AndreyT'
  *
@@ -17,15 +17,24 @@
 
 #include <stdio.h>
 
+#define DEFINE_DEFAULT_CONSTRUCTOR 1
+
+
 class MyClass {
 
 public:
   int testInt;
   int anotherTestInt;
 
-//   MyClass() :  testInt(3),  anotherTestInt(4)  { puts("Constructing..."); }
+#ifdef DEFINE_DEFAULT_CONSTRUCTOR
+  MyClass() : testInt(0), anotherTestInt(0) {
+    puts("Constructor run");
+  }
+#endif
 
-//   ~MyClass()   { puts("Destroying...");   }
+  //   MyClass() :  testInt(3),  anotherTestInt(4)  { puts("Constructing..."); }
+
+  //   ~MyClass()   { puts("Destroying...");   }
 };
 
 
@@ -45,10 +54,13 @@ int main() {
 
 
   // In all of these, value initialisation (i.e. zero initialisation) is used:
+  // (But if a default constructor were defined explicitly, it would be used.)
 
   {
     MyClass *e = new MyClass();
     printf("%d,%d\n", e->testInt, e->anotherTestInt);
+    delete e; // if we did meaningful work in the destructor,
+        // we wouldn't want to destroy a garbage-filled object
   }
 
   {
@@ -56,12 +68,21 @@ int main() {
     printf("%d,%d\n", f.testInt, f.anotherTestInt);
   }
 
+#ifndef DEFINE_DEFAULT_CONSTRUCTOR
+// actually, in Visual Studio, this still compiles fine, but not in g++
   {
-    MyClass h = { }; // or  { 0 }  or  { 0, 0 }
+    MyClass g = {};
+    printf("%d,%d\n", g.testInt, g.anotherTestInt);
+  }
+#endif
+
+#ifndef DEFINE_DEFAULT_CONSTRUCTOR
+  { // Illegal iff a default constructor is explicitly defined:
+    MyClass h = {0};
     printf("%d,%d\n", h.testInt, h.anotherTestInt);
   }
+#endif
 
   puts("All done, terminating...");
 }
-
 
