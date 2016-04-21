@@ -1,6 +1,6 @@
 /**
  * Exploring C++'s weird and wonderful object-initialisation rules,
- * as explained in http://stackoverflow.com/a/2418195 by StackOverflow user 'AndreyT'
+ * as explained in http://stackoverflow.com/a/2418195
  *
  * Obviously, most of this tomfoolery should never see the light of day.
  *
@@ -54,7 +54,8 @@ int main() {
 
 
   // In all of these, value initialisation (i.e. zero initialisation) is used:
-  // (But if a default constructor were defined explicitly, it would be used.)
+  // (But if class were non-POD, constructor would be used.)
+  // (Modulo compiler bugs, that is.)
 
   {
     MyClass *e = new MyClass();
@@ -78,6 +79,7 @@ int main() {
 
 #ifndef DEFINE_DEFAULT_CONSTRUCTOR
   { // Illegal iff a default constructor is explicitly defined:
+    // 'non-aggregate type cannot be initialized with an initializer list'
     MyClass h = {0};
     printf("%d,%d\n", h.testInt, h.anotherTestInt);
   }
