@@ -7,7 +7,7 @@
  * Running on my AMD64 Ubuntu machine, using Clang++ 3.2 (+ LLVM 3.2) and g++ 4.8.1,
  * only g++ gives warnings on compilation (using -Wall and -Wextra for both compilers).
  *
- * cppcheck rightly warns about memory-leaks, but doesn't mind the initialisation madness.
+ * cppcheck doesn't mind the initialisation madness.
  *
  * Also, g++ is harder to get 'real garbage' from; using g++, I see zeroes by happy coincidence
  * for the first two instances given, even with optimisation enabled.
@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 
-#define DEFINE_DEFAULT_CONSTRUCTOR 1
+// #define DEFINE_DEFAULT_CONSTRUCTOR 1
 
 
 class MyClass {
@@ -40,20 +40,23 @@ public:
 
 int main() {
 
-  // Default constructor is used; members contain garbage:
+  // Default constructor is used, members may contain garbage
+  // (assuming we don't define our own default constructor)
   {
     MyClass c;
     printf("%d,%d\n", c.testInt, c.anotherTestInt);
   }
 
-  // Again: default constructor is used; members contain garbage:
+  // Default constructor is used, members may contain garbage
+  // (assuming we don't define our own default constructor)
   {
     MyClass *d = new MyClass;
     printf("%d,%d\n", d->testInt, d->anotherTestInt);
+    delete d;
   }
 
 
-  // In all of these, value initialisation (i.e. zero initialisation) is used:
+  // In all of these below, value initialisation (i.e. zero initialisation) is used:
   // (But if class were non-POD, constructor would be used.)
   // (Modulo compiler bugs, that is.)
 
